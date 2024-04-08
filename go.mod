@@ -1,4 +1,4 @@
-module github.com/vlad-batrak/kbot
+module github.com/vlad-batrak/telegram-bot
 
 go 1.22.1
 

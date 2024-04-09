@@ -1,8 +1,7 @@
 APP=$(shell basename $(shell git remote get-url origin))
-REGISTRY=$(shell echo ${GCP_ARTIFACT_REGISTRY})
+REGISTRY=gcr.io/$(shell echo ${PROJECT_ID})
 VERSION=$(shell git describe --tags --abbrev=0)
 SHA=$(shell git rev-parse --short HEAD)
-
 
 # Target OS (Uncomment one of the next!)
 TARGET_OS=linux
@@ -11,12 +10,10 @@ TARGET_OS=linux
 
 # Target architecture (Uncomment one of the next!)
 TARGET_ARCH=amd64
-# TARGET_ARCH=x86
-# TARGET_ARCH=x64
 # TARGET_ARCH=arm64
 
 
-format:
+format:	
 	gofmt -s -w ./
 
 lint:

@@ -36,4 +36,24 @@ push:
 
 clean:
 	rm -rf kbot
-	docker rmi -f ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_ARCH} 
+	docker rmi -f ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_ARCH}
+
+
+helm:
+	helm create helm
+
+helm-lint:
+	helm lint ./helm
+
+helm-template: helm-lint
+	helm template kbot ./helm
+
+helm-pack:
+	helm package ./helm -u -d ./releases --app-version "${VERSION}-${SHA}"
+
+helm-rollback:
+	$(shell read -p "Enter REVISION " REVISION)
+	helm rollback kbot ${REVISION}
+
+helm-clean:
+	helm uninstall kbot

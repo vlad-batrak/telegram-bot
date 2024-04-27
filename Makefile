@@ -1,5 +1,7 @@
-APP=$(shell basename $(shell git remote get-url origin))
-REGISTRY=gcr.io/$(shell echo ${PROJECT_ID})
+# APP=$(shell basename $(shell git remote get-url origin))
+# REGISTRY=gcr.io/$(shell echo ${PROJECT_ID})
+# REGISTRY=$(shell echo ${DOCKERHUB_USERNAME})
+
 VERSION=$(shell git describe --tags --abbrev=0)
 SHA=$(shell git rev-parse --short HEAD)
 

@@ -10,6 +10,9 @@
 
 /kbot
 /releases
+/releases/*
+/.vscode
+/.vscode/*
 start.sh
 
 

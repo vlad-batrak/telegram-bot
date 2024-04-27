@@ -7,7 +7,7 @@ image:
   registry: "ghcr.io"
   repository: "vladbatrak/telegram-bot"
   # appname: "telegram-bot"
-  tag: "v1.0.4-484926a"
+  tag: "v1.0.4-75bfaae"
   os: "linux"
   arch: "amd64"
 secret:

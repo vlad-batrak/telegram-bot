@@ -3,13 +3,13 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
 image:
-  repository: vladbatrak
-  appname: telegram-bot
-  tag: "v1.0.3-df119c2"
-  arch: amd64
-
+  registry: "ghcr.io"
+  repository: "vladbatrak/telegram-bot"
+  # appname: "telegram-bot"
+  tag: "v1.0.4-484926a"
+  os: "linux"
+  arch: "amd64"
 secret:
   name: "kbot"
   env: "TELE_TOKEN"

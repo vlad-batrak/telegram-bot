@@ -1,11 +1,13 @@
 name: KBOT-CICD
 
-on: push
+on:
+  push:
+    branches:
+      - develop
 
 env:
   APP: "telegram-bot"
   REGISTRY: ghcr.io/${{ github.actor }}
-  
   TARGET_OS: linux
   TARGET_ARCH: amd64
   
@@ -15,8 +17,8 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
 
-    env:
-      ACTIONS_RUNNER_DEBUG: true
+    # env:
+    #   ACTIONS_RUNNER_DEBUG: true
 
     steps:
                           
@@ -39,7 +41,7 @@ jobs:
         run: make image APP=$APP REGISTRY=$REGISTRY TARGET_OS=$TARGET_OS TARGET_ARCH=$TARGET_ARCH
       
       - name: Push
-        run: make push APP=$APP REGISTRY=$REGISTRY TARGET_ARCH=$TARGET_ARCH                  
+        run: make push APP=$APP REGISTRY=$REGISTRY TARGET_OS=$TARGET_OS TARGET_ARCH=$TARGET_ARCH                  
       
       - name: Clean
         run: make clean
@@ -49,6 +51,9 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
 
+    env:
+      ACTIONS_RUNNER_DEBUG: true
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -57,7 +62,7 @@ jobs:
 
     - uses: mikefarah/yq@master
       with:
-        cmd: yq -i '.image.tag=strenv(VERSION) | .image.arch=strenv(TARGET_ARCH)' helm/values.yaml
+        cmd: yq -i '.image.tag=strenv(VERSION) | .image.os=strenv(TARGET_OS) | .image.arch=strenv(TARGET_ARCH)' helm/values.yaml
     - run: |
         git config user.name github-actions
         git config user.email github-actions@github.com

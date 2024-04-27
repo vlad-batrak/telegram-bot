@@ -31,14 +31,14 @@ build: format get
 	CGO_ENABLED=0 GOOS=${TARGET_OS} GOARCH=${TARGET_ARCH} go build -v -o kbot -ldflags "-X="github.com/vlad-batrak/telegram-bot/cmd.appVersion=${VERSION}
 
 image:
-	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_ARCH}
+	docker build . -t ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_OS}-${TARGET_ARCH}
 
 push:
-	docker push ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_ARCH}
+	docker push ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_OS}-${TARGET_ARCH}
 
 clean:
 	rm -rf kbot
-	docker rmi -f ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_ARCH}
+	docker rmi -f ${REGISTRY}/${APP}:${VERSION}-${SHA}-${TARGET_OS}-${TARGET_ARCH}
 
 
 helm:

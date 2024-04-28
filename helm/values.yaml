@@ -1,0 +1,16 @@
+# Default values for helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+image:
+  registry: "ghcr.io"
+  repository: "vladbatrak/telegram-bot"
+  # appname: "telegram-bot"
+  tag: "v1.0.4-75bfaae"
+  os: "linux"
+  arch: "amd64"
+secret:
+  name: "kbot"
+  env: "TELE_TOKEN"
+  key: "token"

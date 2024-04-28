@@ -1,0 +1,70 @@
+name: KBOT-CICD
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  APP: "telegram-bot"
+  REGISTRY: ghcr.io/${{ github.actor }}
+  TARGET_OS: linux
+  TARGET_ARCH: amd64
+  
+jobs:
+
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    # env:
+    #   ACTIONS_RUNNER_DEBUG: true
+
+    steps:
+                          
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run test
+        run: make test
+      
+      - name: GitHub Registry login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build
+        run: make image APP=$APP REGISTRY=$REGISTRY TARGET_OS=$TARGET_OS TARGET_ARCH=$TARGET_ARCH
+      
+      - name: Push
+        run: make push APP=$APP REGISTRY=$REGISTRY TARGET_OS=$TARGET_OS TARGET_ARCH=$TARGET_ARCH                  
+      
+      - name: Clean
+        run: make clean
+
+  cd:
+    name: CD
+    needs: ci
+    runs-on: ubuntu-latest
+
+    env:
+      ACTIONS_RUNNER_DEBUG: true
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - run: echo "VERSION=$(git describe --tags --abbrev=0)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+    - uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.image.tag=strenv(VERSION) | .image.os=strenv(TARGET_OS) | .image.arch=strenv(TARGET_ARCH)' helm/values.yaml
+    - run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git commit -am "update version $VERSION"
+        git push

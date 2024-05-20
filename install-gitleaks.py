@@ -3,9 +3,9 @@ import platform
 import subprocess
 import sys
 import zipfile
+import shutil
 
 version = "v8.18.2"
-
 
 def is_gitleaks_installed():
     """Check if gitleaks is installed."""
@@ -14,7 +14,6 @@ def is_gitleaks_installed():
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
-
 
 def download_and_install_gitleaks():
     """Generate the download URL for gitleaks based on the OS and architecture."""
@@ -39,7 +38,7 @@ def download_and_install_gitleaks():
     file_name = f"gitleaks_{version[1:]}_{os_type}_{arch}"
     url = f"{base_url}/{file_name}"
 
-    if os_type == "linux" or os_type == "darwin":
+    if os_type in ["linux", "darwin"]:
         try:
             subprocess.run(f"curl -sSfL {url}.tar.gz -o gitleaks.tar.gz", shell=True, check=True)
             subprocess.run("tar -xzf gitleaks.tar.gz gitleaks", shell=True, check=True)
@@ -61,13 +60,13 @@ def download_and_install_gitleaks():
             destination_path = os.path.join(os.getenv('ProgramFiles'), 'gitleaks', 'gitleaks.exe')
             
             os.makedirs(os.path.dirname(destination_path), exist_ok=True)
-            os.rename(gitleaks_path, destination_path)
+            shutil.move(gitleaks_path, destination_path)
             
             if destination_path not in os.getenv('PATH'):
                 os.environ['PATH'] += os.pathsep + os.path.dirname(destination_path)
 
             os.remove("gitleaks.zip")
-            os.rmdir("gitleaks")
+            shutil.rmtree("gitleaks")
             
             print("Gitleaks installed successfully.")
         except subprocess.CalledProcessError as e:
@@ -79,7 +78,6 @@ def download_and_install_gitleaks():
     else:
         print(f"Unsupported OS: {os_type}")
         sys.exit(1)
-
 
 def check_gitleaks_hook_enabled():
     try:
@@ -96,12 +94,9 @@ def check_gitleaks_hook_enabled():
             print("Gitleaks pre-commit hook is disabled. Enable it by running:")
             print("git config hooks.gitleaks true")
             sys.exit(1)
-        else:
-            sys.exit(0)
     except subprocess.CalledProcessError:
         print("Error checking git configuration.")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     if not is_gitleaks_installed():
@@ -111,12 +106,15 @@ if __name__ == "__main__":
             print(f"Installation failed: {e}")
             sys.exit(1)
 
-    if check_gitleaks_hook_enabled():
-        try:
-            result = subprocess.run("gitleaks detect --source . --redact", shell=True, check=True)
-            if result.returncode != 0:
-                raise subprocess.CalledProcessError(result.returncode, result.args)
-            sys.exit(0)
-        except subprocess.CalledProcessError:
-            print("Gitleaks detected sensitive information. Please review and fix.")
-            sys.exit(1)
+    check_gitleaks_hook_enabled()
+
+    try:
+        # result = subprocess.run(['gitleaks', 'detect', '--source', '.', '--redact'], check=True)
+        result = subprocess.run(['gitleaks', 'protect', '-v', '--staged'], check=True)
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(result.returncode, result.args)
+        print("No sensitive information detected.")
+        sys.exit(0)
+    except subprocess.CalledProcessError:
+        print("Gitleaks detected sensitive information. Please review and fix.")
+        sys.exit(1)
